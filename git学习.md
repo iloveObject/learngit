@@ -185,3 +185,148 @@ e475afc93c209a690c39c13a46716e8fa000c366 add distributed
 eaadf4e385e865d25c48e7ca9c8395c3f7dfaef0 wrote a readme file
 ```
 
+首先，Git必须知道当前版本是哪个版本，在Git中，用`HEAD`表示当前版本，也就是最新的提交`1094adb...`，上一个版本就是`HEAD^`，上上一个版本就是`HEAD^^`，当然往上100个版本写100个`^`比较容易数不过来，所以写成`HEAD~100`。
+
+回退到上一个版本`add distributed`，就可以使用`git reset`命令：
+
+```
+$ git reset --hard HEAD^
+HEAD is now at e475afc add distributed
+```
+
+Git的版本回退速度非常快，因为Git在内部有个指向当前版本的`HEAD`指针，当你回退版本的时候，Git仅仅是把HEAD从指向`append GPL`：
+
+![image-20210131225457738](/Users/weipeng/Library/Application Support/typora-user-images/image-20210131225457738.png)
+
+Git提供了一个命令`git reflog`用来记录你的每一次命令：
+
+```
+$ git reflog
+e475afc HEAD@{1}: reset: moving to HEAD^
+1094adb (HEAD -> master) HEAD@{2}: commit: append GPL
+e475afc HEAD@{3}: commit: add distributed
+eaadf4e HEAD@{4}: commit (initial): wrote a readme file
+```
+
+#### 工作区和暂存区
+
+##### 工作区
+
+就是上述在本机创建的目录，比如`learngit`文件夹就是一个工作区
+
+##### 版本库
+
+工作区有一个隐藏目录`.git`，这个不算工作区，而是Git的版本库。
+
+Git的版本库里存了很多东西，其中最重要的就是称为stage（或者叫index）的暂存区，还有Git为我们自动创建的第一个分支`master`，以及指向`master`的一个指针叫`HEAD`。
+
+![image-20210201093446114](/Users/weipeng/Library/Application Support/typora-user-images/image-20210201093446114.png)
+
+把文件往Git版本库里添加的时候，是分两步执行的：
+
+第一步是用`git add`把文件添加进去，实际上就是把文件修改添加到暂存区；
+
+第二步是用`git commit`提交更改，实际上就是把暂存区的所有内容提交到当前分支。
+
+创建Git版本库时，Git自动创建了唯一一个`master`分支，因此，`git commit`就是往`master`分支上提交更改。
+
+#### 管理修改
+
+Git跟踪并管理的是修改，而非文件。
+
+#### 撤销修改
+
+`git checkout -- file`可以丢弃工作区的修改：
+
+```
+git checkout -- readme.txt
+```
+
+命令`git checkout -- readme.txt`意思就是，把`readme.txt`文件在工作区的修改全部撤销，这里有两种情况：
+
+一种是`readme.txt`自修改后还没有被放到暂存区，现在，撤销修改就回到和版本库一模一样的状态；
+
+一种是`readme.txt`已经添加到暂存区后，又作了修改，现在，撤销修改就回到添加到暂存区后的状态。
+
+总之，就是让这个文件回到最近一次`git commit`或`git add`时的状态。
+
+`git checkout -- file`命令中的`--`很重要，没有`--`，就变成了“切换到另一个分支”的命令
+
+用命令`git reset HEAD `可以把暂存区的修改撤销掉（unstage），重新放回工作区：
+
+```
+$ git reset HEAD readme.txt
+Unstaged changes after reset:
+M	readme.txt
+```
+
+`git reset`命令既可以回退版本，也可以把暂存区的修改回退到工作区。当我们用`HEAD`时，表示最新的版本。
+
+#### 删除文件
+
+第一步：直接在文件管理器中把没用的文件删了，或者用`rm`命令删除
+
+```
+$ rm test.txt
+```
+
+第二步：`git status`命令可以查看哪些文件被删除：
+
+```
+$ git status
+On branch master
+Changes not staged for commit:
+  (use "git add/rm <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+	deleted:    test.txt
+
+no changes added to commit (use "git add" and/or "git commit -a")
+```
+
+第三步：一种情况：确实要从版本库中删除该文件，用命令`git rm`删掉，并且`git commit`：
+
+```
+$ git rm test.txt
+rm 'test.txt'
+
+$ git commit -m "remove test.txt"
+[master d46f35e] remove test.txt
+ 1 file changed, 1 deletion(-)
+ delete mode 100644 test.txt
+```
+
+注意：先手动删除文件，然后使用git rm <file>和git add<file>效果是一样的。
+
+另一种情况是删错了，因为版本库里还有，所以可以把误删的文件恢复到最新版本：
+
+```
+$ git checkout -- test.txt
+```
+
+`git checkout`其实是用版本库里的版本替换工作区的版本，无论工作区是修改还是删除，都可以“一键还原”。
+
+注意：命令`git rm`用于删除一个文件。如果一个文件已经被提交到版本库，那么你永远不用担心误删，但是要小心，你只能恢复文件到最新版本，你会丢失**最近一次提交后你修改的内容**。（因为未提交到版本库）
+
+* * *
+
+#### 远程仓库
+
+本地Git仓库和GitHub仓库之间的传输是通过SSH加密的,因此需要一点设置：
+
+第1步：创建SSH Key。在用户主目录下，看看有没有.ssh目录，如果有，再看看这个目录下有没有`id_rsa`和`id_rsa.pub`这两个文件，如果已经有，即已经创建好。
+
+```
+$ ssh-keygen -t rsa -C "youremail@example.com"
+```
+
+第2步：登陆GitHub，打开“Account settings”，“SSH Keys”页面：
+
+然后，点“Add SSH Key”，填上任意Title，在Key文本框里粘贴`id_rsa.pub`文件的内容
+
+点“Add Key”，你就应该看到已经添加的Key。
+
+##### 添加远程仓库
+
+在GitHub创建一个Git仓库：
+
