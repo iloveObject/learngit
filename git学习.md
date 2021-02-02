@@ -444,3 +444,10 @@ $ git commit -m "branch test"
  1 file changed, 1 insertion(+)
 ```
 
+切换回`master`分支：
+
+```
+$ git checkout master
+Switched to branch 'master'
+```
+
