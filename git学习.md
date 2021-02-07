@@ -451,3 +451,17 @@ $ git checkout master
 Switched to branch 'master'
 ```
 
+切换回`master`分支后，再查看`readme.txt`文件，刚才添加的内容消失了！因为那个提交是在`dev`分支上，而`master`分支此刻的提交点并没有变：
+
+![git-br-on-master](https://www.liaoxuefeng.com/files/attachments/919022533080576/0)
+
+把`dev`分支的工作成果合并到`master`分支上：
+
+```
+$ git merge dev
+Updating d46f35e..b17d20e
+Fast-forward
+ readme.txt | 1 +
+ 1 file changed, 1 insertion(+)
+```
+
