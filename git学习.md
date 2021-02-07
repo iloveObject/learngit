@@ -465,3 +465,32 @@ Fast-forward
  1 file changed, 1 insertion(+)
 ```
 
+`git merge`命令用于合并指定分支到当前分支。合并后，当前分支和`dev`分支的最新提交是完全一样的。
+
+删除`dev`分支：
+
+```
+$ git branch -d dev
+Deleted branch dev (was b17d20e).
+```
+
+##### switch
+
+切换分支使用`git checkout <branch>`，撤销修改是`git checkout -- <file>`，同一个命令，有两种作用。
+
+切换分支，也可以用`switch`。
+
+创建并切换到新的`dev`分支，可以使用：
+
+```
+$ git switch -c dev
+```
+
+切换到已有的`master`分支：
+
+```
+$ git switch master
+```
+
+##### 解决冲突
+
